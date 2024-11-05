@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Instagram Reel Processor",
+  "description": "Process Instagram reels with one click.",
+  "version": "1.0",
+  "permissions": ["scripting", "activeTab", "storage", "downloads"],
+  "host_permissions": ["*://*.instagram.com/*", "http://localhost:5000/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://www.instagram.com/reel/*","*://www.instagram.com/reels/*","*://www.instagram.com/p/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
