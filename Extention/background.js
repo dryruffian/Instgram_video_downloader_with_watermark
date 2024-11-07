@@ -2,7 +2,7 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'processReel') {
         processVideo(request.url, sendResponse);
-        return true; // Keep message channel open for async response
+        return true;
     }
 });
 

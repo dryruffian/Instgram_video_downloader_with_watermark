@@ -1,20 +1,59 @@
-// content.js
 (function() {
     let processButton = null;
 
     function initialize() {
-        if (processButton) return;
-        createProcessButton();
+        observeDOM();
     }
 
-    function createProcessButton() {
-        processButton = document.createElement('button');
-        processButton.id = 'process-reel-button';
-        processButton.textContent = 'Process Reel';
-        processButton.style.cssText = `
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
+    function observeDOM() {
+        // Target the main container where Instagram dynamically loads content
+        const targetNode = document.body;
+
+        // Options for the observer (watch for child nodes and subtree changes)
+        const config = { childList: true, subtree: true };
+
+        // Callback function to execute when mutations are observed
+        const callback = function(mutationsList, observer) {
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    addProcessButtonToReels();
+                }
+            }
+        };
+
+        // Create an observer instance
+        const observer = new MutationObserver(callback);
+
+        // Start observing the target node
+        observer.observe(targetNode, config);
+
+        // Initial check
+        addProcessButtonToReels();
+    }
+
+    function addProcessButtonToReels() {
+        // Adjust this selector to target Instagram's reel video elements
+        const videoElements = document.querySelectorAll('video');
+
+        videoElements.forEach(video => {
+            const parentContainer = video.parentElement;
+
+            if (!parentContainer || parentContainer.querySelector('#process-reel-button')) {
+                return; // Skip if the button already exists
+            }
+
+            createProcessButton(parentContainer, video);
+        });
+    }
+
+    function createProcessButton(container, video) {
+        const button = document.createElement('button');
+        button.id = 'process-reel-button';
+        button.textContent = 'Process Reel';
+        button.style.cssText = `
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
             z-index: 9999;
             padding: 10px 20px;
             background-color: #4CAF50;
@@ -26,39 +65,42 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         `;
 
-        processButton.addEventListener('mouseover', () => {
-            processButton.style.backgroundColor = '#45a049';
+        button.addEventListener('mouseover', () => {
+            button.style.backgroundColor = '#45a049';
         });
 
-        processButton.addEventListener('mouseout', () => {
-            processButton.style.backgroundColor = '#4CAF50';
+        button.addEventListener('mouseout', () => {
+            button.style.backgroundColor = '#4CAF50';
         });
 
-        processButton.addEventListener('click', handleButtonClick);
-        document.body.appendChild(processButton);
+        button.addEventListener('click', () => handleButtonClick(video));
+
+        // Ensure the container is positioned relative
+        container.style.position = 'relative';
+        container.appendChild(button);
     }
 
-    function handleButtonClick() {
+    function handleButtonClick(video) {
         const reelUrl = window.location.href;
-        
-        processButton.disabled = true;
-        processButton.style.backgroundColor = '#cccccc';
-        processButton.textContent = 'Processing...';
 
-        // Send message to background script using chrome.runtime.sendMessage
+        const button = video.parentElement.querySelector('#process-reel-button');
+        button.disabled = true;
+        button.style.backgroundColor = '#cccccc';
+        button.textContent = 'Processing...';
+
         chrome.runtime.sendMessage(
-            { 
+            {
                 action: 'processReel',
-                url: reelUrl 
+                url: reelUrl,
             },
-            handleResponse
+            response => handleResponse(response, button)
         );
     }
-    
-    function handleResponse(response) {
-        processButton.disabled = false;
-        processButton.style.backgroundColor = '#4CAF50';
-        processButton.textContent = 'Process Reel';
+
+    function handleResponse(response, button) {
+        button.disabled = false;
+        button.style.backgroundColor = '#4CAF50';
+        button.textContent = 'Process Reel';
 
         if (response && response.success) {
             showNotification(response.message || 'Success!', 'success');
