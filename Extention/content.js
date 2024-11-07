@@ -52,8 +52,8 @@
         button.textContent = 'Process Reel';
         button.style.cssText = `
             position: absolute;
-            bottom: 10px;
-            right: 10px;
+            top: 10px;
+            left: 10px;
             z-index: 9999;
             padding: 10px 20px;
             background-color: #4CAF50;
