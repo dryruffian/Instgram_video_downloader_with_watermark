@@ -11,7 +11,7 @@ import tempfile
 from werkzeug.utils import secure_filename
 import traceback
 from pathlib import Path
-
+from uitls.Uitility import validate_url, cleanup_file
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -67,27 +67,6 @@ def setup_logging():
     return root_logger
 
 logger = setup_logging()
-
-# Utility functions
-def generate_unique_filename(extension):
-    """Generate a unique filename with the given extension."""
-    return f"{uuid.uuid4()}.{extension}"
-
-def cleanup_file(filepath):
-    """Safely delete a file if it exists."""
-    try:
-        if filepath and os.path.exists(filepath):
-            os.remove(filepath)
-            logger.debug(f"Cleaned up file: {filepath}")
-    except Exception as e:
-        logger.error(f"Error cleaning up file {filepath}: {str(e)}")
-
-def validate_url(url):
-    """Basic URL validation for Instagram URLs."""
-    if not url:
-        return False
-    return url.startswith(('http://instagram.com', 'https://instagram.com',
-                          'http://www.instagram.com', 'https://www.instagram.com'))
 
 # Decorators
 def handle_errors(f):
